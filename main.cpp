@@ -33,7 +33,7 @@ using namespace chrono;
 
 
 template <typename T>
-void func (vector<T> &v)
+void gen_func (vector<T> &v)
 {
     generate(v.begin(), v.end(), rand);
 }
@@ -48,8 +48,6 @@ public:
     ~background_task(){}
 
     void operator()() const{}
-
-
 };
 
 
@@ -72,7 +70,7 @@ void print()
 
 
 template <typename T>
-void foutfunc (vector<T> v)
+void fout_func (vector<T> v)
 {
     fstream fout;
     fout.open("/home/smasuryan/zeromq_projects/thr_test/test.txt", ios_base::app);
