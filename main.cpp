@@ -92,10 +92,8 @@ class Task
     int x;
     vector<int> vec;
 public:
-    int j= 5;
-    Task(int o) : j() { x = o; }
-    //Task() { x = 0; }
-//    Task(int i) { x = i; }
+    Task() { x = 0; }
+    Task(int i) { x = i; }
     Task(vector<int> &v) {  func(v);  }
 
     ~Task() {}
@@ -128,20 +126,17 @@ int main ()
     clock_t start = clock();
 //----------------------------------------------------------------
 
-   // vector <int> vec_t(10, 1);
+    vector <int> vec_t(10, 1);
 
-    //Task t(vec_t);
-    Task t1(99);
+    Task t(vec_t);
+    Task t1;
 
-    thread tt(t1);
-    tt.join();
+    thread th(t), th1(t1);
+    th.join();
 
-    //thread th(t), th1(t1);
-    //th.join();
+    copy(vec_t.begin(), vec_t.end(), out);
 
-    //copy(vec_t.begin(), vec_t.end(), out);
-
-    //th1.join();
+    th1.join();
 
 
 
