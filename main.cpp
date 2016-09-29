@@ -1,54 +1,7 @@
-#include <iostream>
-#include <iomanip>
-#include <stdio.h>
-
-//#include <ctime>
-//#include <time.h>
-#include <chrono>
-
-#include <vector>
-#include <algorithm>
-#include <iterator>
-#include <functional>
-#include <string>
-#include <utility>
-#include <list>
-#include <set>
-
-#include <memory>
-
-#include <fstream>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <cstring>
-#include <string.h>
-
-#include <thread>
-
-
+#include "stdfx.h"
 
 using namespace std;
 using namespace chrono;
-
-
-template <typename T>
-void gen_func (vector<T> &v)
-{
-    generate(v.begin(), v.end(), rand);
-}
-
-
-class background_task
-{
-
-public:
-    background_task(){}
-    background_task(vector<int> &v) { generate(v.begin(), v.end(), rand);}
-    ~background_task(){}
-
-    void operator()() const{}
-};
 
 
 template <typename T>
@@ -58,61 +11,46 @@ void show(vector<T> v)
         cout << a << endl;
 }
 
-void print()
-{
-    int x = 0;
-    while(x < 100){
-        ++x;
-        cout << x << endl;
-        system("clear");
-    }
-}
-
-
 template <typename T>
-void fout_func (vector<T> v)
+void func (vector<T> &v)
 {
-    fstream fout;
-    fout.open("/home/smasuryan/zeromq_projects/thr_test/test.txt", ios_base::app);
-    int x = 0;
-    for (auto a : v){
-        fout << a << endl;
-        fout.flush();
-        ++x;
-    }
-    fout <<  "x = " << x << endl;
-    fout.close();
+     generate(v.begin(), v.end(), rand);
 }
 
-
-class Task
+class Btask
 {
-    int x;
-    vector<int> vec;
+  string st1;
 public:
-    Task() { x = 0; }
-    Task(int i) { x = i; }
-    Task(vector<int> &v) {  func(v);  }
+  Btask(string s) { st1 = s; }
+  void operator ()() const  {}
 
-    ~Task() {}
+  int rnd_str()
+  {
+       default_random_engine dre(clock());
+       uniform_int_distribution<int> di(97, 122);
+       char ch;
+       size_t count = 0;
+       string str, rand_word = st1;
+       size_t size = 0;
 
-    void some_func() {
-        int x = 90000000;
-            while(x)
-                --x;
-            cout << x << endl;
-            }
+       while (str != rand_word) {
+           str = "";
+           size = rand_word.size();
+           while (size){
+               ch  = static_cast<char>(di(dre));
+               str.push_back(ch);
+               --size;
+             }
+           ++count;
+         }
+
+       return count;
+  }
 
 
-
-    template <typename T>
-    void func (vector<T> &v)
-    {
-        generate(v.begin(), v.end(), rand);
-    }
-
-    void operator () () { some_func(); }
 };
+
+
 
 int main ()
 {
@@ -124,40 +62,17 @@ int main ()
     clock_t start = clock();
 //----------------------------------------------------------------
 
-    vector <int> vec_t(10, 1);
+    vector <int> vec_t(10);
 
-    Task t(vec_t);
-    Task t1;
+    Btask obj1("test");
+    Btask obj2("test");
 
-    thread th(t), th1(t1);
+    thread th(obj1);
     th.join();
 
-    copy(vec_t.begin(), vec_t.end(), out);
 
-    th1.join();
-
-
-
-
-/*    vector<int> vec(c), vec1(c);
-
-    background_task f(vec);
-    thread th1(f);
-    th1.join();
-    thread th( [=](){ foutfunc(vec); } );
-    th.join();
-
-*/
-
-/*
-    background_task f(vec);
-    thread th(f), th1( [](){ print(); } );
-    th1.detach();
-    th.join();
-
-    cout << "heare" << endl;
-    func(vec1);
-*/
+    cout << obj1.rnd_str() << endl;
+    cout << obj2.rnd_str() << endl;
 
 //----------------------------------------------------------------
     clock_t finish = clock();
