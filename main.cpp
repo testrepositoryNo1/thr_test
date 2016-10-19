@@ -1,4 +1,4 @@
-#include "stdfx.h"
+#include "main.hpp"
 
 using namespace std;
 using namespace chrono;
@@ -17,39 +17,30 @@ void func (vector<T> &v)
      generate(v.begin(), v.end(), rand);
 }
 
-class Btask
+
+const string currentDateTime()
 {
-  string st1;
-public:
-  Btask(string s) { st1 = s; }
-  void operator ()() const  {}
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
 
-  int rnd_str()
-  {
-       default_random_engine dre(clock());
-       uniform_int_distribution<int> di(97, 122);
-       char ch;
-       size_t count = 0;
-       string str, rand_word = st1;
-       size_t size = 0;
-
-       while (str != rand_word) {
-           str = "";
-           size = rand_word.size();
-           while (size){
-               ch  = static_cast<char>(di(dre));
-               str.push_back(ch);
-               --size;
-             }
-           ++count;
-         }
-
-       return count;
-  }
+    return buf;
+}
 
 
-};
+void foo()
+{
+  ofstream fout;
+  fout.open("test.txt", ios::app);
 
+  for (size_t i = 0; i < 10; ++i) {
+      fout << currentDateTime() << endl;
+      sleep(1);
+    }
+  fout.close();
+}
 
 
 int main ()
@@ -58,21 +49,22 @@ int main ()
     srand(time(0));
     srand(rand());
     ostream_iterator<int> out(cout, "\n");
-//    const size_t c = 10000;
+    const size_t c = 30;
     clock_t start = clock();
 //----------------------------------------------------------------
 
-    vector <int> vec_t(10);
+    ofstream fout;
+    fout.open("test.txt", ios::app);
 
-    Btask obj1("test");
-    Btask obj2("test");
-
-    thread th(obj1);
-    th.join();
-
-
-    cout << obj1.rnd_str() << endl;
-    cout << obj2.rnd_str() << endl;
+    thread th(foo);
+    th.detach();
+    sleep(10); /* поток завершается когда основной процесс заканчивается,
+                  т.е. если основной процесс (из которого был запущен поток) заканчивается до того
+                  как отсоединенный поток завершит свои "дела", этот поток тоже будет остановлен...
+                  (вывод ) сделан  на осове тестов...
+               */
+    fout << " - " << currentDateTime() << endl;
+    fout.close();
 
 //----------------------------------------------------------------
     clock_t finish = clock();
