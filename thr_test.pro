@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += qt thread debug
 CONFIG += c++14
+QMAKE_CXXFLAGS_DEBUG += -pg
+QMAKE_LFLAGS_DEBUG += -pg
 
 LIBS += -L/path/boost/lib/ -lboost_thread -lboost_system -lboost_chrono
 
