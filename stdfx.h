@@ -17,6 +17,8 @@
 #include <functional>
 #include <string>
 #include <utility>
+#include <numeric>
+#include <mutex>
 #include <list>
 //#include <complex>
 //#include <set>

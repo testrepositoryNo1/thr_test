@@ -42,13 +42,68 @@ void foo()
   fout.close();
 }
 
-
-void gen(vector<int> &v, size_t _size)
+template <typename Type>
+void gen(Type &v, size_t _size)
 {
     my_boost_int_Rnd rnd;
     for (size_t i = 0; i < _size; ++i)
         v.push_back(rnd.int_boost_rnd());
 }
+
+
+
+
+/*mutex some_mutex;
+
+void add(list<int> &add_to_list ,int new_value)
+{
+    lock_guard<mutex> guard(some_mutex);
+    add_to_list.push_back(new_value);
+}
+
+bool list_contains(list<int> some_list, int value_to_find)
+{
+    lock_guard<mutex> guard(some_mutex);
+    return *find(some_list.begin(), some_list.end(), value_to_find) == value_to_find;
+}
+*/
+
+
+void print(vector<int> &v)
+{
+    mutex test_mutex;
+    test_mutex.lock();
+    //lock_guard<mutex> guard(test_mutex);
+    for (auto elem : v) {
+            cout << elem << " ";
+        }
+    cout << endl;
+    test_mutex.unlock();
+}
+
+/*
+void f1(int &n, mutex &mtx)
+{
+    while (1) {
+            mtx.lock();
+            cout << "f1 " << n << endl;
+            n += 2;
+            mtx.unlock();
+            usleep(95000);
+        }
+}
+
+void f2(int &n, mutex &mtx)
+{
+    while (1) {
+            mtx.lock();
+            cout << "f2 " << n << endl;
+            n -= 2;
+            mtx.unlock();
+            usleep(95000);
+        }
+}
+*/
 
 
 int main ()
@@ -57,56 +112,43 @@ int main ()
       srand(time(0));
       srand(rand());
       ostream_iterator<int> out(cout, "\n");
-      const size_t size = 1000000;
+      const size_t size = 100000;
       boost::chrono::milliseconds start(clock());
 //----------------------------------------------------------------
 
-      size_t sum = 0, sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+      int n = 10;
+      mutex mtx;
 
-      vector<int> vec;
-      gen(vec, size);
-
-      thread thr1([vec, &sum1]()
-      {
-              auto iter = vec.begin();
-              for (size_t i = 0; i < vec.size() / 4; ++i, ++iter)
-                  sum1 += *iter;
-              return sum1;
-          });
-
-
-      thread thr2([vec, &sum2]()
-      {
-              auto iter = vec.begin() + vec.size() / 4;
-              for (size_t i = vec.size() / 4; i < vec.size() / 2; ++i, ++iter)
-                  sum2 += *iter;
-              return sum2;
-          });
-
-
-      thread thr3([vec, &sum3]()
-      {
-              size_t sz = vec.size() * 3 / 4;
-              auto iter = vec.begin() + vec.size() / 2;
-              for (size_t i = vec.size() / 2; i < sz ; ++i, ++iter)
-                  sum3 += *iter;
-              return sum3;
-          });
-
-
-      size_t sz = vec.size();
-      auto iter = vec.begin() + vec.size() * 3 / 4;
-      for (size_t i = vec.size() * 3 / 4; i < sz ; ++i, ++iter)
-          sum4 += *iter;
+      thread thr1([&n, &mtx](){ f1(n, mtx); });
+      thread thr2([&n, &mtx](){ f2(n, mtx); });
 
       thr1.join();
       thr2.join();
-      thr3.join();
 
-      sum = sum1 + sum2 + sum3 + sum4;
-      cout << sum << endl;
+     /* vector<int> vec(size);
+
+      thread thr([&vec](){ print(vec); });
+
+      for (size_t i = size / 2; i < size; ++i)
+          vec.at(i) = i;
+
+      thr.join();*/
 
 
+      /*list<int> lst{1,2,3,4,5,6,7,8,9,10};
+       //gen(lst, 10);
+
+       add(lst, 88);
+
+       bool b = list_contains(lst, 89);
+
+       if (b)
+           cout << "true" << endl;
+       else
+           cout << "false" << endl;
+
+       for (auto a : lst)
+           cout << a << endl;*/
 //---------------------------------------------------------------
       boost::chrono::milliseconds end(clock());
       using ms = boost::chrono::milliseconds;
