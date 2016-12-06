@@ -7,7 +7,7 @@ CONFIG += c++14
 QMAKE_CXXFLAGS_DEBUG += -pg
 QMAKE_LFLAGS_DEBUG += -pg
 
-LIBS += -L/path/boost/lib/ -lboost_thread -lboost_system -lboost_chrono
+LIBS += -L/path/boost/lib/ -lboost_thread -lboost_system -lboost_chrono -lboost_filesystem
 
 SOURCES += main.cpp
 QMAKE_CXXFLAGS += -std=c++11
