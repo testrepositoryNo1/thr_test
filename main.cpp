@@ -2,8 +2,30 @@
 
 using namespace std;
 
-/* files generator */
-void fill_files()
+
+class Read_and_fill
+{
+
+private:
+    double sum;
+    double mtpl;
+    double sum_of_sq;
+    deque<double> deq;
+    mutex mtx; /* думаю ы этом приложении этот мютекс роли особо не играет */
+
+public:
+    Read_and_fill() { sum = 0.0; mtpl = 1; sum_of_sq = 0.0; }
+    void    fill_files();
+    double  addition (deque<double> deq);
+    double  multiplication (deque<double> deq);
+    double  sum_of_squares (deque<double> deq);
+    double  read_file(int _number, mutex &mtx);
+    void    threads();
+    void    show_in_terminal();
+};
+
+
+void Read_and_fill::fill_files()
 {
     ofstream fout;
     string str;
@@ -18,13 +40,13 @@ void fill_files()
                 }
             fout.close();
         }
+    threads();
 }
-
 
 /*
    сложение
 */
-double addition (deque<double> deq)
+double Read_and_fill::addition (deque<double> deq)
 {
     double sum = 0.0;
 
@@ -37,7 +59,7 @@ double addition (deque<double> deq)
 /*
    умножение
 */
-double multiplication (deque<double> deq)
+double Read_and_fill::multiplication (deque<double> deq)
 {
     double mtpl = 1.0;
 
@@ -50,7 +72,7 @@ double multiplication (deque<double> deq)
 /*
    сумма квадратов
 */
-double sum_of_squares (deque<double> deq)
+double Read_and_fill::sum_of_squares (deque<double> deq)
 {
     double sum = 0.0;
 
@@ -60,13 +82,7 @@ double sum_of_squares (deque<double> deq)
     return sum;
 }
 
-struct temp {
-    double sum{0.0};
-    double mtpl{0.0};
-    double sum_of_sq{0.0};
-};
-
-double read_file(int _number, mutex &mtx)
+double Read_and_fill::read_file(int _number, mutex &mtx)
 {
     lock_guard<mutex> guard(mtx);
     string str = "file_no_" + to_string(_number) + ".txt";
@@ -82,15 +98,50 @@ double read_file(int _number, mutex &mtx)
     int instruction = deq.front();
     deq.pop_front();
 
-    temp obj;
 
     switch (instruction) {
-        case 1: obj.sum       = addition(deq); return obj.sum;
-        case 2: obj.mtpl      = multiplication(deq); return obj.mtpl;
-        case 3: obj.sum_of_sq = sum_of_squares(deq); return obj.sum_of_sq;
+        case 1: sum       = addition(deq); return sum;
+        case 2: mtpl      = multiplication(deq); return mtpl;
+        case 3: sum_of_sq = sum_of_squares(deq); return sum_of_sq;
         }
     return  -1;
 }
+
+void Read_and_fill::threads()
+{
+   ofstream fout("out.dat", ios::out);
+
+   thread thr1([&fout, this]()
+   {
+           sum = read_file(1, mtx);
+           fout << "just sum: " << sum << "\n";
+       });
+   thread thr2([&fout, this]()
+   {
+           mtpl = read_file(2, mtx);
+           fout << fixed << "multiplication: " << mtpl << "\n"; });
+
+   thread thr3([&fout, this]()
+   {
+           sum_of_sq = read_file(3, mtx);
+           fout << "sum_of_squares: " << sum_of_sq << "\n";
+       });
+
+   thr1.join();
+   thr2.join();
+   thr3.join();
+
+
+}
+
+void  Read_and_fill::show_in_terminal()
+{
+    cout << "just sum" << setw(8) << " : " << sum << "\n"
+         << fixed << "multiplication: " << mtpl << "\n"
+         << "sum_of_squares: " << sum_of_sq << endl;
+}
+
+
 
 int main ()
 {
@@ -103,36 +154,10 @@ int main ()
 //----------------------------------------------------------------
 
 
-      fill_files();
+      Read_and_fill  raf;
 
-
-      ofstream fout("out.dat", ios::out);
-      mutex mtx;
-      temp tmp;
-
-
-
-      thread thr1([&fout, &mtx, &tmp]()
-      {
-              tmp.sum = read_file(1, mtx);
-              fout << "just sum: " << tmp.sum << "\n";
-          });
-      thread thr2([&fout, &mtx, &tmp]()
-      {
-              tmp.mtpl = read_file(2, mtx);
-              fout << fixed << "multiplication: " << tmp.mtpl << "\n"; });
-
-      thread thr3([&fout, &mtx, &tmp]()
-      {
-              tmp.sum_of_sq = read_file(3, mtx);
-               fout << "sum_of_squares: " << tmp.sum_of_sq << "\n";
-          });
-
-      thr1.join();
-      thr2.join();
-      thr3.join();
-
-      cout << tmp.sum << "\n" << tmp.mtpl << "\n" << tmp.sum_of_sq << endl;
+      raf.fill_files();
+      raf.show_in_terminal();
 
 //---------------------------------------------------------------
       boost::chrono::milliseconds end(clock());
