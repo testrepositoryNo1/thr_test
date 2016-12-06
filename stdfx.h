@@ -12,6 +12,7 @@
 //#include <chrono>
 
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <iterator>
 #include <functional>
@@ -26,7 +27,8 @@
 #include <memory>
 #include <thread>
 
-#include <unistd.h>
+//#include <unistd.h>
+//#include <boost/type_index.hpp>
 #include <boost/chrono.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
