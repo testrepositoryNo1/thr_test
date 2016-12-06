@@ -1,56 +1,6 @@
 #include "main.hpp"
 
 using namespace std;
-using namespace chrono;
-
-
-template <typename T>
-void show(vector<T> v)
-{
-    for (auto a : v)
-        cout << a << endl;
-}
-
-template <typename T>
-void func (vector<T> &v)
-{
-     generate(v.begin(), v.end(), rand);
-}
-
-
-const string currentDateTime()
-{
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
-    tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-
-    return buf;
-}
-
-
-void foo()
-{
-  ofstream fout;
-  fout.open("test.txt", ios::app);
-
-  for (size_t i = 0; i < 10; ++i) {
-      fout << " + " << currentDateTime() << endl;
-      sleep(1);
-    }
-  fout.close();
-}
-
-template <typename Type>
-void gen(Type &v, size_t _size)
-{
-    my_boost_int_Rnd rnd;
-    for (size_t i = 0; i < _size; ++i)
-        v.push_back(rnd.int_boost_rnd());
-}
-
-
 
 
 /*mutex some_mutex;
@@ -69,16 +19,29 @@ bool list_contains(list<int> some_list, int value_to_find)
 */
 
 
-void print(vector<int> &v)
+void print(vector<int> v, mutex &mtx)
 {
-    mutex test_mutex;
-    test_mutex.lock();
-    //lock_guard<mutex> guard(test_mutex);
+    //mtx.lock();
+    lock_guard<mutex> guard(mtx);
+
+    /*for (size_t i = 0; i < v.size(); ++i)
+        v.at(i) = 1;*/
+
     for (auto elem : v) {
             cout << elem << " ";
         }
     cout << endl;
-    test_mutex.unlock();
+    //mtx.unlock();
+}
+
+
+void foo(vector<int> &v, mutex &mtx)
+{
+    //mtx.lock();
+    lock_guard<mutex> guard(mtx);
+    for (size_t i = v.size() / 2; i < v.size(); ++i)
+        v.at(i) = i;
+    //mtx.unlock();
 }
 
 /*
@@ -106,6 +69,9 @@ void f2(int &n, mutex &mtx)
 */
 
 
+
+
+
 int main ()
 {
       setlocale(0, "");
@@ -116,23 +82,17 @@ int main ()
       boost::chrono::milliseconds start(clock());
 //----------------------------------------------------------------
 
-      int n = 10;
+      vector<int> vec(size);
       mutex mtx;
 
-      thread thr1([&n, &mtx](){ f1(n, mtx); });
-      thread thr2([&n, &mtx](){ f2(n, mtx); });
+      thread th1([vec, &mtx](){ print(vec, mtx); });
+      thread th2([&vec, &mtx](){ foo(vec, mtx); });
 
-      thr1.join();
-      thr2.join();
+      th1.join();
+      th2.join();
 
-     /* vector<int> vec(size);
-
-      thread thr([&vec](){ print(vec); });
-
-      for (size_t i = size / 2; i < size; ++i)
-          vec.at(i) = i;
-
-      thr.join();*/
+      for (size_t i = size - 20; i < size; ++i)
+              cout << vec.at(i) << endl;
 
 
       /*list<int> lst{1,2,3,4,5,6,7,8,9,10};
